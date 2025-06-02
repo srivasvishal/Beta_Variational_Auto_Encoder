@@ -12,6 +12,7 @@ import math
 from torch.utils.data import Dataset, DataLoader
 from utils.test import test_function
 
+
 class DSpritesDataset(Dataset):
     """Loader for the dSprites npz file (key 'imgs', shape N×64×64)."""
     def __init__(self, npz_path: str):
@@ -108,8 +109,17 @@ if __name__ == '__main__':
     train_loader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size,
                                                shuffle=True, num_workers=2)
     # define the model
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print(device)
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # print(device)
+    if torch.cuda.is_available() and args.device >= 0:
+        device = torch.device(f"cuda:{args.device}")
+        print(f"Using CUDA device {args.device}: {torch.cuda.get_device_name(args.device)}")
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        device = torch.device("mps")
+        print("Using Apple MPS backend")
+    else:
+        device = torch.device("cpu")
+        print("Using CPU")
     net = VAE(args, d=dim, h_num=hid_num)
     net.to(device)
     optimizer = torch.optim.Adagrad(net.parameters())
