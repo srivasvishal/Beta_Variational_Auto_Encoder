@@ -18,64 +18,23 @@ Demo for Training VAE
 
 mkdir -p results
 
-python main.py \
-  --dataset      mnist \
-  --data_dir     data/binarized_mnist \
-  --epochs       50 \
-  --batch_size   64 \
-  --decoder_type bernoulli \
-  --Nz           10 \
-  --save_dir     results \
-2>&1 | tee results/train.log
+python main.py --dataset mnist --data_dir data --epochs 30 --batch_size 128 --beta 4.0 --capacity 50 --decoder_type bernoulli --Nz 20 --save_dir saved_models --device 0 2>&1 | tee results/train_mnist_capacity.log
 
 
 ## MNIST dataset --report generation
 
-python plot_prelim.py \
-  --log  results/train.log \
-  --out  prelim_experiment_mnist.pdf
+python plot_metrics.py --log results/train_mnist_capacity.log --out results/metrics_mnist_capacity.pdf
 
 
 ##  Dsprites Dataset  --- Input
 
-mkdir -p results/dsprites
-
-python main.py \
-  --dataset      dsprites \
-  --dsprites_path dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz \
-  --epochs       50 \
-  --batch_size   64 \
-  --decoder_type bernoulli \
-  --Nz           10 \
-  --device       0 \
-  --save_dir     results/dsprites \
-2>&1 | tee results/dsprites/train.log
+  python main.py --dataset dsprites --dsprites_path dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz --data_dir data --epochs 50 --batch_size 128 --beta 4.0 --capacity 50 --eval_freq 10 --decoder_type bernoulli --Nz 20 --save_dir saved_models --device 0 2>&1 | tee results/train_dsprites_capacity.log
 
 ## Dsprites dataset --report generation
-python plot_prelim.py \
-  --log results/train.log \
-  --out  prelim_experiment_dsprites.pdf
+python plot_metrics.py --log results/train_dsprites_capacity.log --out results/metrics_dsprites_capacity.pdf
 
 =======
-optional arguments:
-  -h, --help            show this help message and exit
-  --dataset {mnist,ff}  Dataset to train the VAE
-  --data_dir DATA_DIR   The directory of your dataset
-  --epochs NUM_EPOCHS   Total number of epochs
-  --batch_size BATCH_SIZE
-                        The batch size
-  --device DEVICE       Index of device
-  --save_dir SAVE_DIR   The directory to save your trained model
-  --decoder_type {bernoulli,gaussian}
-                        Type of your decoder
-  --Nz NZ               Nz (dimension of the latent code)
->>>>>>> 2925d8f (Initial changes for Beta-VAE)
-```
 
-It can be seen by running
-```
-python main.py --help
-```
 
 ## Datasets 
 
