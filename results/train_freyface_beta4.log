@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/Users/vishalsrivastava/Workspace/Projects/UCI_Projects/CS275P_Beta_Variational_Auto_Encoder/main.py", line 14, in <module>
+    from vae_net import VAE
+  File "/Users/vishalsrivastava/Workspace/Projects/UCI_Projects/CS275P_Beta_Variational_Auto_Encoder/vae_net.py", line 150
+    loss = -torch.mean(elbo) r
+                             ^
+SyntaxError: invalid syntax
