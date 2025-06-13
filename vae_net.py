@@ -147,7 +147,7 @@ class VAE(nn.Module):
 
         # ─── Total Loss ────────
         elbo = recons - kl_term
-        loss = -torch.mean(elbo) r
+        loss = -torch.mean(elbo)
 
 
         return loss, torch.mean(-recons), torch.mean(kl_term)
