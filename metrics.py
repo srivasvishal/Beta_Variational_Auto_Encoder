@@ -1,82 +1,90 @@
 import numpy as np
+import torch
 import sklearn.linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mutual_info_score
 from scipy.stats import entropy
-import torch
-
 
 def compute_beta_vae_score(dataset, model, num_samples=10000, random_state=42):
-    factors = dataset.sample_factors(num_samples, random_state)
-    observations = dataset.sample_observations_from_factors(factors, random_state)  # Tensor
+    """
+    β-VAE disentanglement score (dSprites only).
+    Sample full 6‐factor tuples, then drop the constant color factor (size=1).
+    """
+    # 1) sample full tuples
+    full_factors = dataset.sample_factors(num_samples, random_state)  # (N,6)
+    obs = dataset.sample_observations_from_factors(full_factors, random_state)
 
+    # 2) encode & normalize
     device = next(model.parameters()).device
-    observations = observations.to(device)
-
+    obs = obs.to(device)
     with torch.no_grad():
-        mus, _ = model.encode(observations)
-    mus_np = mus.cpu().numpy()
+        mu_z, _ = model.encode(obs)
+    mus = mu_z.cpu().numpy()
+    mus = (mus - mus.mean(axis=0)) / (mus.std(axis=0) + 1e-8)
 
-    mus_np = (mus_np - mus_np.mean(axis=0)) / (mus_np.std(axis=0) + 1e-8)
+    # 3) drop the color factor (first element where latents_sizes==1)
+    keep = [size > 1 for size in dataset.latents_sizes]
+    factors = full_factors[:, keep]  # now (N,5)
 
-    rng = np.random.RandomState(random_state)
-    factor_id = rng.randint(factors.shape[1], size=num_samples)
-    z_diff = np.zeros((num_samples, mus_np.shape[1]), dtype=np.float32)
-
+    # 4) build z_diff & labels
+    factor_id = np.random.randint(factors.shape[1], size=num_samples)
+    z_diff = np.zeros((num_samples, mus.shape[1]), dtype=np.float32)
     for i in range(num_samples):
         k = factor_id[i]
-        same_factor = np.where(factors[:, k] == factors[i, k])[0]
-        j = rng.choice(same_factor)
-        z_diff[i] = np.abs(mus_np[i] - mus_np[j])
+        same = np.where(factors[:, k] == factors[i, k])[0]
+        j = np.random.choice(same)
+        z_diff[i] = np.abs(mus[i] - mus[j])
 
-    X_train, X_test, y_train, y_test = train_test_split(
+    # 5) train & evaluate classifier
+    Xtr, Xte, ytr, yte = train_test_split(
         z_diff, factor_id, test_size=0.2, random_state=random_state
     )
-
     clf = sklearn.linear_model.LogisticRegression(max_iter=1000)
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    return acc
+    clf.fit(Xtr, ytr)
+    return clf.score(Xte, yte)
 
 
 def compute_mig(dataset, model, num_samples=10000, random_state=42):
+    """
+    Mutual Information Gap (dSprites only).
+    Sample full 6‐factor tuples, drop the color factor, then compute MIG.
+    """
+    full_factors = dataset.sample_factors(num_samples, random_state)  # (N,6)
+    obs = dataset.sample_observations_from_factors(full_factors, random_state)
 
-    factors = dataset.sample_factors(num_samples, random_state)
-    observations = dataset.sample_observations_from_factors(factors, random_state)
     device = next(model.parameters()).device
-    observations = observations.to(device)
-
-
+    obs = obs.to(device)
     with torch.no_grad():
-        mus, _ = model.encode(observations)
-    mus_np = mus.cpu().numpy()
+        mu_z, _ = model.encode(obs)
+    mus = mu_z.cpu().numpy()
+
+    # drop color factor
+    keep = [size > 1 for size in dataset.latents_sizes]
+    factors = full_factors[:, keep]  # (N,5)
+
+    num_factors, Nz = factors.shape[1], mus.shape[1]
+
+    # discretize latents into B bins
     B = 20
-    num_latents = mus_np.shape[1]  # Nz Value
-    z_disc = np.zeros_like(mus_np, dtype=int)
+    z_disc = np.zeros_like(mus, dtype=int)
+    for j in range(Nz):
+        _, edges = np.histogram(mus[:, j], bins=B)
+        z_disc[:, j] = np.digitize(mus[:, j], edges[:-1], right=False)
 
-    for j in range(num_latents):
-        # Compute bin edges for the j-th latent dimension
-        edges = np.histogram_bin_edges(mus_np[:, j], bins=B)
-        # Digitize: values in [0..B-1]
-        z_disc[:, j] = np.digitize(mus_np[:, j], edges[:-1])
-
-    num_factors = factors.shape[1]  # for dSprites, this is 5
-    mi_matrix = np.zeros((num_factors, num_latents), dtype=np.float32)
-
+    # mutual information matrix
+    mi = np.zeros((num_factors, Nz), dtype=np.float64)
     for k in range(num_factors):
-        for j in range(num_latents):
-            mi_matrix[k, j] = mutual_info_score(factors[:, k], z_disc[:, j])
+        for j in range(Nz):
+            mi[k, j] = mutual_info_score(factors[:, k], z_disc[:, j])
 
-    factor_entropies = np.zeros(num_factors, dtype=np.float32)
+    # entropies of each factor
+    ent = np.zeros(num_factors, dtype=np.float64)
     for k in range(num_factors):
         counts = np.bincount(factors[:, k])
-        factor_entropies[k] = entropy(counts + 1e-8)
+        ent[k] = entropy(counts + 1e-8)
 
-    normalized_mi = mi_matrix / np.expand_dims(factor_entropies, axis=1)
-
-    sorted_mi = np.sort(normalized_mi, axis=1)[:, ::-1]
-    top1 = sorted_mi[:, 0]
-    top2 = sorted_mi[:, 1]
-
-    mig_score = np.mean(top1 - top2)
+    # normalized MI and compute gap
+    norm_mi = mi / ent.reshape(num_factors, 1)
+    sorted_mi = -np.sort(-norm_mi, axis=1)
+    mig_score = float(np.mean(sorted_mi[:, 0] - sorted_mi[:, 1]))
     return mig_score
