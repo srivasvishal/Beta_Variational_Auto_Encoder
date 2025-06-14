@@ -1,7 +1,11 @@
 Traceback (most recent call last):
-  File "/Users/vishalsrivastava/Workspace/Projects/UCI_Projects/CS275P_Beta_Variational_Auto_Encoder/main.py", line 14, in <module>
-    from vae_net import VAE
-  File "/Users/vishalsrivastava/Workspace/Projects/UCI_Projects/CS275P_Beta_Variational_Auto_Encoder/vae_net.py", line 150
-    loss = -torch.mean(elbo) r
-                             ^
-SyntaxError: invalid syntax
+  File "/Users/vishalsrivastava/Workspace/Projects/UCI_Projects/CS275P_Beta_Variational_Auto_Encoder/main.py", line 159, in <module>
+    matfile = h5py.File(os.path.join(args.data_dir, 'Frey_Face', 'frey_rawface.mat'), 'r')
+  File "/Users/vishalsrivastava/Workspace/Projects/UCI_Projects/CS275P_Beta_Variational_Auto_Encoder/venv/venv/lib/python3.9/site-packages/h5py/_hl/files.py", line 564, in __init__
+    fid = make_fid(name, mode, userblock_size, fapl, fcpl, swmr=swmr)
+  File "/Users/vishalsrivastava/Workspace/Projects/UCI_Projects/CS275P_Beta_Variational_Auto_Encoder/venv/venv/lib/python3.9/site-packages/h5py/_hl/files.py", line 238, in make_fid
+    fid = h5f.open(name, flags, fapl=fapl)
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "h5py/h5f.pyx", line 102, in h5py.h5f.open
+OSError: Unable to synchronously open file (file signature not found)
