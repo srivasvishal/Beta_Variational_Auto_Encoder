@@ -62,10 +62,11 @@ For detailed methodology, experiments, and results, check the full report:
 git clone https://github.com/srivasvishal/Beta_Variational_Auto_Encoder.git
 
 # 2. Install dependencies
-pip install -r requirements.txt
+pip install pytorch numpy scipy matplotlib
 
 # 3. Train the model
-python main.py --dataset mnist --beta 4 --epochs 30
+python main.py --dataset mnist --beta 4 --epochs 30  # incase of MNIST
+python main.py --dataset dsprites --beta 4 --epochs 30  # incase of dSprites
 
 # 4. Evaluate results
 python plot_metrics.py
