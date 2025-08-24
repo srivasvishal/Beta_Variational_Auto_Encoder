@@ -1,50 +1,73 @@
-By diving into Variational Autoencoders (VAE) and β-VAEs, we explore the
-effects β has on disentanglement of latent expressions. Using MNIST and dSprites
-datasets, we evaluate the models impacts on reconstruction quality, and latent space
-structure. Our results demonstrate that moderate β values promote meaningful
-disentanglement, balancing the trade-off between fidelity and factorization.
+# 🎯 Disentangled Representation Learning with β-VAE  
 
-```
+[![Report](https://img.shields.io/badge/Report-PDF-blue)]([docs/Project_Report.pdf](https://github.com/srivasvishal/Beta_Variational_Auto_Encoder/blob/071aa0cc23992dc69d642df4b261a3638ef30fe5/β-VAE%20Based%20Representation%20Learning%20for%20Interpretable%20Generative%20Modeling.pdf))  
+[![Python](https://img.shields.io/badge/Python-3.9%2B-green)]() [![PyTorch](https://img.shields.io/badge/Framework-PyTorch-red)]() [![License](https://img.shields.io/badge/License-MIT-black)]()  
 
+---
 
-Demo for Training VAE
+## 📌 Introduction  
+This project explores **Variational Autoencoders (VAEs)** and their extension, the **β-VAE**, to study the trade-off between reconstruction fidelity and disentangled latent representations.  
+We implemented models in **PyTorch**, evaluated them on **MNIST, Fashion-MNIST, and dSprites**, and analyzed the impact of the hyperparameter β.  
 
+---
 
-##  MNIST Dataset ---  Input
+## 📊 Datasets  
+- **MNIST** → Handwritten digit images (28×28 grayscale)  
+- **Fashion-MNIST** → Clothing item images (28×28 grayscale)  
+- **dSprites** → Synthetic dataset with controlled generative factors (shape, scale, rotation, position)  
 
-mkdir -p results
+---
 
-python main.py --dataset mnist --data_dir data --epochs 30 --batch_size 128 --beta 4.0 --capacity 50 --decoder_type bernoulli --Nz 20 --save_dir saved_models --device -1 2>&1 | tee results/train_mnist_capacity.log
+## 🏗️ Architecture  
+- **Encoder–Decoder framework** with reparameterization trick  
+- **β-VAE loss function**:  
+  \[
+  L(\theta, \phi; x) = \mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x|z)] - \beta \, KL(q_\phi(z|x) || p(z))
+  \]  
+- Configurable for **Bernoulli** or **Gaussian decoders**  
+- Training pipelines with logging, checkpoints, and visualization utilities  
 
+---
 
-## MNIST dataset --  report generation
+## ⚙️ Implementation Details  
+- Framework: **PyTorch** (v2.1)  
+- Languages: **Python, SQL** (for utilities & data validation)  
+- AWS Integration: **S3 (data storage), Glue (ETL jobs), Lambda (automation), CloudWatch (monitoring)**  
+- Optimizer: **Adagrad** with learning rate 1e-2  
+- Batch size: **128**  
+- Epochs: **30 (MNIST), 50 (dSprites)**  
 
-{ MNIST has no ground‐truth “latents” (no shape/scale/rotation/position factors), so we don’t attempt to compute β‐VAE score or MIG .}
+---
 
-python plot_metrics.py --log results/train_mnist_capacity.log --out results/metrics_mnist_capacity.pdf
+## 📈 Results & Insights  
+- **β = 1** → High reconstruction quality, but entangled latent factors  
+- **β = 4** → Best trade-off; disentangled factors (digit slant, stroke width, object scale, position) while preserving sharp reconstructions  
+- **β ≥ 8** → Over-regularization; blurry outputs, under-utilized latent capacity  
 
+### Sample Reconstructions & Latent Traversals  
+*(Add images/plots here if available — e.g., training curves, traversal grids)*  
 
-##  Dsprites Dataset  --- Input
+---
 
-  python main.py --dataset dsprites --dsprites_path dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz --data_dir data --epochs 50 --batch_size 128 --beta 4.0 --capacity 50 --eval_freq 10 --decoder_type bernoulli --Nz 20 --save_dir saved_models --device -1 2>&1 | tee results/train_dsprites_capacity.log
+## 📄 Project Report  
+For detailed methodology, experiments, and results, check the full report:  
 
-## Dsprites dataset --  report generation
+👉 [**Download Project Report (PDF)**]([docs/Project_Report.pdf](https://github.com/srivasvishal/Beta_Variational_Auto_Encoder/blob/071aa0cc23992dc69d642df4b261a3638ef30fe5/β-VAE%20Based%20Representation%20Learning%20for%20Interpretable%20Generative%20Modeling.pdf))  
 
-python plot_metrics.py --log results/train_dsprites_capacity.log --out results/metrics_dsprites_capacity.pdf
+---
 
+## 🚀 How to Run  
 
-## Frey face  Dataset  --- Input
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/beta-vae.git
+cd beta-vae
 
-{ Frey‐Face has no ground‐truth “latents” (no shape/scale/rotation/position factors), so we don’t attempt to compute β‐VAE score or MIG .}
+# 2. Install dependencies
+pip install -r requirements.txt
 
-python main.py --dataset ff --data_dir data --epochs 30 --batch_size 64 --beta 4.0 --capacity None --decoder_type gaussian --Nz 20 --save_dir saved_models --device 0 2>&1 | tee results/train_freyface_beta4.log
+# 3. Train the model
+python main.py --dataset mnist --beta 4 --epochs 30
 
-## Frey face  Dataset ---  report generation
-
-python plot_metrics.py --log results/train_freyface_beta4.log --out results/metrics_freyface_beta4.pdf
-
-
-=======
-
-
-
+# 4. Evaluate results
+python plot_metrics.py
