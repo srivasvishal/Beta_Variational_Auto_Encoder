@@ -20,10 +20,13 @@ We implemented models in **PyTorch**, evaluated them on **MNIST, Fashion-MNIST, 
 
 ## 🏗️ Architecture  
 - **Encoder–Decoder framework** with reparameterization trick  
-- **β-VAE loss function**:  
-  \[
-  L(\theta, \phi; x) = \mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x|z)] - \beta \, KL(q_\phi(z|x) || p(z))
-  \]  
+- **β-VAE objective (minimize):**
+
+     Minimize:  L = ReconLoss(x, x_hat) + beta * KL( q(z|x) || N(0, I) )
+
+  Where:
+  - $\text{ReconLoss}$ = **BCE** (for binary/normalized images) or **MSE** (for continuous),
+  - $\beta$ controls the trade-off: higher $\beta$ → more disentanglement, less reconstruction fidelity.
 - Configurable for **Bernoulli** or **Gaussian decoders**  
 - Training pipelines with logging, checkpoints, and visualization utilities  
 
@@ -31,8 +34,7 @@ We implemented models in **PyTorch**, evaluated them on **MNIST, Fashion-MNIST, 
 
 ## ⚙️ Implementation Details  
 - Framework: **PyTorch** (v2.1)  
-- Languages: **Python, SQL** (for utilities & data validation)  
-- AWS Integration: **S3 (data storage), Glue (ETL jobs), Lambda (automation), CloudWatch (monitoring)**  
+- Languages: **Python, SQL** (for utilities & data validation)   
 - Optimizer: **Adagrad** with learning rate 1e-2  
 - Batch size: **128**  
 - Epochs: **30 (MNIST), 50 (dSprites)**  
