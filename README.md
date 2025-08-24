@@ -1,7 +1,7 @@
 # 🎯 Disentangled Representation Learning with β-VAE  
 
 [![Report](https://img.shields.io/badge/Report-PDF-blue)](β-VAE_Based_Representation_Learning_for_Interpretable_Generative_Modeling.pdf)  
-[![Python](https://img.shields.io/badge/Python-3.9%2B-green)]() [![PyTorch](https://img.shields.io/badge/Framework-PyTorch-red)]() [![License](https://img.shields.io/badge/License-MIT-black)]()  
+[![Python](https://img.shields.io/badge/Python-3.9%2B-green)]() [![PyTorch](https://img.shields.io/badge/Framework-PyTorch-red)]()
 
 ---
 
