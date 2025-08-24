@@ -46,9 +46,6 @@ We implemented models in **PyTorch**, evaluated them on **MNIST, Fashion-MNIST, 
 - **β = 4** → Best trade-off; disentangled factors (digit slant, stroke width, object scale, position) while preserving sharp reconstructions  
 - **β ≥ 8** → Over-regularization; blurry outputs, under-utilized latent capacity  
 
-### Sample Reconstructions & Latent Traversals  
-*(Add images/plots here if available — e.g., training curves, traversal grids)*  
-
 ---
 
 ## 📄 Project Report  
