@@ -59,8 +59,7 @@ For detailed methodology, experiments, and results, check the full report:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/beta-vae.git
-cd beta-vae
+git clone https://github.com/srivasvishal/Beta_Variational_Auto_Encoder.git
 
 # 2. Install dependencies
 pip install -r requirements.txt
