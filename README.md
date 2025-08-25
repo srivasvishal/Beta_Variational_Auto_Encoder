@@ -51,7 +51,7 @@ We implemented models in **PyTorch**, evaluated them on **MNIST, Fashion-MNIST, 
 ## 📄 Project Report  
 For detailed methodology, experiments, and results, check the full report:  
 
-👉 [**Download Project Report (PDF)**](β-VAE_Based_Representation_Learning_for_Interpretable_Generative_Modeling)  
+👉 [**Download Project Report (PDF)**](β-VAE_Based_Representation_Learning_for_Interpretable_Generative_Modeling.pdf)  
 
 ---
 
